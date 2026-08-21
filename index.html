@@ -11,7 +11,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,10 100,90 0,90' fill='%23ff2a85'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Upgraded to Montserrat for a modern, sleek, geometric feel -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -32,21 +31,17 @@
 
 html,body{height:100%}
 body{
-  background:
-    radial-gradient(120% 80% at 50% -10%, #1c1030 0%, transparent 60%),
-    var(--bg);
+  background: radial-gradient(120% 80% at 50% -10%, #1c1030 0%, transparent 60%), var(--bg);
   color:var(--text);
   font-family:var(--body);
   display:flex;
   flex-direction:column;
   align-items:center;
-  /* Shifted from center to start, relying on padding and auto-margins to center dynamically without bleeding */
   justify-content:flex-start; 
   gap:12px;
   margin:0;
   padding: 4vh 14px;
   min-height:100dvh;
-  /* Allow vertical scrolling on extremely short screens rather than bleeding */
   overflow-y:auto; 
   overflow-x:hidden;
   user-select:none;
@@ -55,7 +50,6 @@ body{
   touch-action:none;
 }
 
-/* Push everything to the middle visually, but allow scrolling if it overlaps */
 #main-wrapper {
   display: flex;
   flex-direction: column;
@@ -66,20 +60,19 @@ body{
   margin: auto;
 }
 
-/* ---------- header ---------- */
+/* ---------- Header Re-Layout ---------- */
 header{
   width:100%;
-  /* Restrict max width relative to viewport height to prevent bleeding */
   max-width: min(420px, 100dvh - 280px);
   display:flex;
-  justify-content:space-between;
+  flex-direction:column; /* Stacked for mobile */
   align-items:center;
-  gap:10px;
+  gap:12px;
 }
 
 h1{
   font-family:var(--display);
-  font-size:clamp(1.1rem, 4.6vw, 1.45rem);
+  font-size:clamp(1.2rem, 5vw, 1.6rem);
   letter-spacing:.16em;
   margin:0;
   font-weight:900;
@@ -88,7 +81,6 @@ h1{
   white-space:nowrap;
 }
 
-/* the triangle stands in for the A in TRIANGLE */
 h1 .tri{
   display:inline-block;
   transform:translateY(-1px) scaleX(1.05);
@@ -97,15 +89,20 @@ h1 .tri{
   text-shadow:0 0 14px rgba(49,230,214,.55);
 }
 
-.header-controls{display:flex;gap:8px}
+.header-controls{
+  display:flex;
+  gap:12px;
+  justify-content: center;
+  width: 100%;
+}
 
 .icon-btn{
   background:transparent;
   border:1.5px solid var(--pink);
   color:var(--pink);
-  width:34px;height:34px;
+  width:36px;height:36px;
   border-radius:50%;
-  font-size:1.05rem;
+  font-size:1.1rem;
   font-weight:700;
   font-family:var(--body);
   line-height:1;
@@ -361,6 +358,26 @@ h1 .tri{
 .action-btn:hover{filter:brightness(1.12)}
 .action-btn:active{transform:scale(.985)}
 .action-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.action-btn:disabled{opacity: 0.5; cursor: not-allowed;}
+
+/* Leaderboard Input UI */
+.name-input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--line);
+  color: #fff;
+  border-radius: 8px;
+  font-family: var(--display);
+  font-size: 1rem;
+  text-align: center;
+  outline: none;
+}
+.name-input:focus { border-color: var(--cyan); }
+.lb-entry { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 10px 0; }
+.lb-name { color: var(--text); font-weight: bold; font-family: var(--body); }
+.lb-score { color: var(--pink); font-family: var(--display); font-weight: bold; }
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -383,9 +400,11 @@ h1 .tri{
   <header>
     <h1>TRI<span class="tri">▲</span>NGLE TRIBE</h1>
     <div class="header-controls">
-      <button class="icon-btn" id="music-toggle" title="Play music" aria-label="Play music">♪</button>
-      <button class="icon-btn" id="info-btn" title="How to play" aria-label="How to play">i</button>
-      <button class="icon-btn" id="restart-btn" title="Start again" aria-label="Start again">↺</button>
+      <button class="icon-btn" id="music-toggle" title="Toggle Music">♪</button>
+      <button class="icon-btn active" id="sfx-toggle" title="Toggle Sound Effects">✦</button>
+      <button class="icon-btn" id="lb-btn" title="Global Leaderboard">🏆</button>
+      <button class="icon-btn" id="info-btn" title="How to play">i</button>
+      <button class="icon-btn" id="restart-btn" title="Start again">↺</button>
     </div>
   </header>
 
@@ -404,8 +423,7 @@ h1 .tri{
     </div>
   </div>
 
-  <p id="hint">67.<BR><a href="#" id="sfx-toggle" style="color: var(--muted); font-size: 0.75rem; letter-spacing: 0.05em; text-decoration: underline; margin-top: 5px; cursor: pointer;">Mute Effects</a>
-</div></p>
+  <p id="hint">Tap a shape, then tap the grid — or drag it across</p>
 </div>
 
 <div id="drag-avatar"></div>
@@ -428,6 +446,17 @@ h1 .tri{
   </div>
 </div>
 
+<!-- Leaderboard View -->
+<div id="leaderboard-modal" class="modal">
+  <div class="modal-content">
+    <h2>TOP TRIBE</h2>
+    <div id="leaderboard-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto;">
+      <p style="text-align:center;">Loading scores...</p>
+    </div>
+    <button class="action-btn" data-close="leaderboard-modal">Close</button>
+  </div>
+</div>
+
 <!-- Restart confirm -->
 <div id="restart-modal" class="modal">
   <div class="modal-content">
@@ -443,15 +472,23 @@ h1 .tri{
   <div class="modal-content">
     <h2 id="over-title">NO MOVES LEFT</h2>
     <p id="over-sub" style="text-align:center">None of your three shapes fit the grid.</p>
-    <p class="final-label" style="margin-top:16px">Final score</p>
     <div class="final" id="final-score">0</div>
     <p id="over-best" style="text-align:center;font-size:.8rem"></p>
-    <button class="action-btn" id="play-again">Play again</button>
+    
+    <div id="submit-section" style="display: none; margin-top:15px;">
+      <input type="text" id="player-name" class="name-input" placeholder="ENTER YOUR NAME" maxlength="15">
+      <button class="action-btn" id="submit-score-btn" style="background: var(--cyan); color: var(--bg);">Submit to Leaderboard</button>
+    </div>
+
+    <button class="action-btn ghost" id="play-again">Play again</button>
   </div>
 </div>
 
 <script>
 "use strict";
+
+// --- PASTE YOUR GOOGLE SCRIPT URL HERE ---
+const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec";
 
 /* ============================================================
    STATE
@@ -716,7 +753,16 @@ function endRound(){
   renderTray();
   document.getElementById('final-score').textContent = score;
   document.getElementById('over-best').textContent =
-    score >= best && score > 0 ? 'New personal best' : `Best: ${best}`;
+    score >= best && score > 0 ? 'New personal best!' : `Best: ${best}`;
+    
+  // Show submission field if score > 0
+  const submitSection = document.getElementById('submit-section');
+  if (score > 0 && LEADERBOARD_URL !== "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec") {
+    submitSection.style.display = 'block';
+  } else {
+    submitSection.style.display = 'none';
+  }
+  
   sfxOver();
   openModal('over-modal');
 }
@@ -889,9 +935,9 @@ startBtn.addEventListener('click', () => {
 });
 
 /* ============================================================
-   AUDIO
+   AUDIO & SFX
    ============================================================ */
-let ac = null, master = null, musicBus = null, musicOn = false;
+let ac = null, master = null, musicBus = null, musicOn = false, sfxOn = true;
 let tickId = null, nextTime = 0, step = 0;
 const BPM = 74;
 const SPB = 60 / BPM / 4; 
@@ -1001,6 +1047,7 @@ function scheduler(){
   }
 }
 
+// TOGGLE BUTTONS
 const musicBtn = document.getElementById('music-toggle');
 musicBtn.addEventListener('click', () => {
   primeAudio();
@@ -1010,14 +1057,12 @@ musicBtn.addEventListener('click', () => {
   if (musicOn){
     musicOn = false;
     musicBtn.classList.remove('active');
-    musicBtn.title = musicBtn.ariaLabel = 'Play music';
     musicBus.gain.cancelScheduledValues(ac.currentTime);
     musicBus.gain.setTargetAtTime(0, ac.currentTime, 0.25);
     clearInterval(tickId); tickId = null;
   } else {
     musicOn = true;
     musicBtn.classList.add('active');
-    musicBtn.title = musicBtn.ariaLabel = 'Mute music';
     step = 0;
     nextTime = ac.currentTime + 0.1;
     musicBus.gain.cancelScheduledValues(ac.currentTime);
@@ -1027,7 +1072,12 @@ musicBtn.addEventListener('click', () => {
   }
 });
 
-let sfxOn = true;
+const sfxBtn = document.getElementById('sfx-toggle');
+sfxBtn.addEventListener('click', () => {
+  sfxOn = !sfxOn;
+  if(sfxOn) sfxBtn.classList.add('active');
+  else sfxBtn.classList.remove('active');
+});
 
 function sfxPlace(){
   if (!ac || !sfxOn) return;
@@ -1045,15 +1095,68 @@ function sfxOver(){
   [69, 65, 62, 57].forEach((m, i) => tone(hz(m), t + i * 0.13, 0.5, 0.14, 'sine', master));
 }
 
-// Toggle Sound Effects Link
-const sfxToggleBtn = document.getElementById('sfx-toggle');
-if (sfxToggleBtn) {
-  sfxToggleBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    sfxOn = !sfxOn;
-    sfxToggleBtn.textContent = sfxOn ? "Mute Sound Effects" : "Unmute Sound Effects";
-  });
+
+/* ============================================================
+   LEADERBOARD LOGIC
+   ============================================================ */
+const lbBtn = document.getElementById('lb-btn');
+const submitBtn = document.getElementById('submit-score-btn');
+const nameInput = document.getElementById('player-name');
+
+lbBtn.addEventListener('click', () => {
+  openModal('leaderboard-modal');
+  loadLeaderboard();
+});
+
+function loadLeaderboard() {
+  const list = document.getElementById('leaderboard-list');
+  if (LEADERBOARD_URL === "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec") {
+    list.innerHTML = '<p style="text-align:center;">Leaderboard not configured yet!</p>';
+    return;
+  }
+  
+  list.innerHTML = '<p style="text-align:center;">Loading scores...</p>';
+  
+  fetch(`${LEADERBOARD_URL}?action=get`)
+    .then(res => res.json())
+    .then(data => {
+      list.innerHTML = '';
+      if(data.length === 0) {
+        list.innerHTML = '<p style="text-align:center;">No scores yet. Be the first!</p>';
+        return;
+      }
+      data.forEach((entry, index) => {
+        list.innerHTML += `
+          <div class="lb-entry">
+            <span class="lb-name">${index + 1}. ${entry.name}</span>
+            <span class="lb-score">${entry.score}</span>
+          </div>
+        `;
+      });
+    })
+    .catch(err => {
+      list.innerHTML = '<p style="text-align:center; color: #ff4d4d;">Failed to load leaderboard.</p>';
+    });
 }
+
+submitBtn.addEventListener('click', () => {
+  const name = nameInput.value.trim() || "Anonymous";
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  fetch(`${LEADERBOARD_URL}?action=add&name=${encodeURIComponent(name)}&score=${score}`)
+    .then(res => res.json())
+    .then(() => {
+      document.getElementById('submit-section').style.display = 'none';
+      openModal('leaderboard-modal');
+      loadLeaderboard();
+    })
+    .catch(err => {
+      submitBtn.textContent = "Error. Try again.";
+      submitBtn.disabled = false;
+    });
+});
+
 
 /* ============================================================
    MODALS + WIRING
@@ -1070,7 +1173,12 @@ document.getElementById('confirm-restart').addEventListener('click', resetGame);
 document.getElementById('play-again').addEventListener('click', resetGame);
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape'){ closeModal('info-modal'); closeModal('restart-modal'); selected = null; renderTray(); clearGhost(); }
+  if (e.key === 'Escape'){ 
+    closeModal('info-modal'); 
+    closeModal('restart-modal'); 
+    closeModal('leaderboard-modal');
+    selected = null; renderTray(); clearGhost(); 
+  }
 });
 
 buildBoardDOM();
@@ -1080,8 +1188,8 @@ resetGame();
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registered', reg))
-        .catch((err) => console.log('Service Worker failed', err));
+        .then((reg) => console.log('Service Worker registered'))
+        .catch((err) => console.log('Service Worker failed'));
     });
   }
 </script>
