@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>TRI▲NGLE TRIBE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0714;
+  --panel:#150f24;
+  --line:#2c1b42;
+  --pink:#ff2a85;
+  --pink-soft:#ff66a3;
+  --cyan:#31e6d6;
+  --text:#f0e6f6;
+  --muted:#bfa3d4;
+  --glow:rgba(255,42,133,.5);
+  --display:"Chakra Petch",system-ui,sans-serif;
+  --body:"Space Grotesk",system-ui,-apple-system,sans-serif;
+}
+
+*{box-sizing:border-box}
+
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(120% 80% at 50% -10%, #1c1030 0%, transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:0;
+  padding:14px;
+  min-height:100dvh;
+  overflow:hidden;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:none;
+}
+
+/* ---------- header ---------- */
+header{
+  width:100%;
+  max-width:420px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+h1{
+  font-family:var(--display);
+  font-size:clamp(1.05rem,4.6vw,1.35rem);
+  letter-spacing:.16em;
+  margin:0;
+  font-weight:700;
+  color:var(--pink);
+  text-shadow:0 0 18px var(--glow);
+  white-space:nowrap;
+}
+
+/* the triangle stands in for the A in TRIANGLE */
+h1 .tri{
+  display:inline-block;
+  transform:translateY(1px) scaleX(.86);
+  font-size:.95em;
+  color:var(--cyan);
+  text-shadow:0 0 14px rgba(49,230,214,.55);
+}
+
+.header-controls{display:flex;gap:8px}
+
+.icon-btn{
+  background:transparent;
+  border:1.5px solid var(--pink);
+  color:var(--pink);
+  width:34px;height:34px;
+  border-radius:50%;
+  font-size:1.05rem;
+  font-weight:700;
+  font-family:var(--body);
+  line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .18s,color .18s,box-shadow .18s;
+  box-shadow:0 0 8px var(--glow);
+}
+.icon-btn:hover{background:rgba(255,42,133,.18)}
+.icon-btn.active{background:var(--pink);color:var(--bg);box-shadow:0 0 16px var(--glow)}
+.icon-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+/* ---------- stats ---------- */
+#stats-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  width:100%;
+  max-width:420px;
+  padding:0 4px;
+}
+.score-label{
+  font-size:.62rem;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);
+  display:block;margin-bottom:2px;
+}
+.score-value{
+  font-family:var(--display);
+  font-size:1.6rem;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+#best-score{color:var(--pink)}
+#combo-flag{
+  font-family:var(--display);
+  font-size:.8rem;
+  letter-spacing:.12em;
+  color:var(--cyan);
+  opacity:0;
+  transition:opacity .25s;
+  align-self:center;
+}
+#combo-flag.show{opacity:1}
+
+/* ---------- board ---------- */
+#game-container{
+  background:rgba(25,17,40,.72);
+  padding:14px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  box-shadow:0 20px 50px rgba(0,0,0,.6), inset 0 0 20px rgba(255,42,133,.05);
+  width:100%;
+  max-width:420px;
+}
+
+#game-board{
+  display:grid;
+  grid-template-columns:repeat(9,1fr);
+  grid-template-rows:repeat(9,1fr);
+  gap:3px;
+  background:var(--panel);
+  padding:8px;
+  border-radius:12px;
+  width:100%;
+  aspect-ratio:1;
+}
+
+.cell{
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line);
+  border-radius:4px;
+  position:relative;
+  transition:background .12s,border-color .12s;
+}
+/* 3x3 box banding so the sudoku regions read at a glance */
+.cell.band{background:rgba(255,255,255,.07)}
+
+.cell.filled{
+  background:linear-gradient(180deg,var(--pink-soft),var(--pink));
+  border:none;
+  border-radius:2px;
+  clip-path:polygon(50% 4%,100% 100%,0% 100%);
+  box-shadow:0 0 10px var(--glow);
+  animation:pop .16s ease-out;
+}
+@keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
+
+.cell.ghost{
+  background:rgba(255,42,133,.28);
+  border-color:var(--pink);
+}
+.cell.ghost-bad{
+  background:rgba(255,60,60,.22);
+  border-color:#ff4d4d;
+}
+.cell.clearing{
+  background:#fff;
+  border:none;
+  clip-path:polygon(50% 4%,100% 100%,0% 100%);
+  animation:shatter .26s ease-in forwards;
+}
+@keyframes shatter{
+  0%{transform:scale(1);opacity:1}
+  40%{transform:scale(1.25);opacity:1}
+  100%{transform:scale(.2);opacity:0}
+}
+
+/* ---------- tray ---------- */
+#piece-tray{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+
+.piece-slot{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--panel);
+  border:1.5px dashed var(--line);
+  border-radius:12px;
+  cursor:grab;
+  touch-action:none;
+  transition:border-color .18s,box-shadow .18s,opacity .12s;
+}
+.piece-slot.empty{border-style:solid;opacity:.22;cursor:default}
+.piece-slot.selected{
+  border-color:var(--cyan);
+  border-style:solid;
+  box-shadow:0 0 0 1px var(--cyan),0 0 18px rgba(49,230,214,.35);
+}
+.piece-slot.dragging{opacity:.2}
+
+.mini-grid{display:grid;gap:2px;pointer-events:none}
+.mini-cell{width:15px;height:15px;border-radius:2px}
+.mini-cell.on{
+  background:linear-gradient(180deg,var(--pink-soft),var(--pink));
+  clip-path:polygon(50% 4%,100% 100%,0% 100%);
+  box-shadow:0 0 6px var(--glow);
+}
+
+#drag-avatar{
+  position:fixed;top:0;left:0;
+  pointer-events:none;
+  z-index:900;
+  display:none;
+  filter:drop-shadow(0 12px 14px rgba(0,0,0,.55));
+}
+#drag-avatar .mini-cell{border-radius:3px}
+
+#hint{
+  text-align:center;
+  font-size:.68rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  opacity:.65;
+  max-width:420px;
+}
+
+/* ---------- modals ---------- */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(11,7,20,.92);
+  backdrop-filter:blur(6px);
+  display:none;
+  align-items:center;justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.modal.open{display:flex}
+
+.modal-content{
+  background:var(--panel);
+  border:1px solid var(--pink);
+  padding:26px 24px;
+  border-radius:16px;
+  max-width:340px;width:100%;
+  box-shadow:0 0 50px rgba(255,42,133,.22);
+  animation:rise .22s ease-out;
+}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+
+.modal h2{
+  font-family:var(--display);
+  letter-spacing:.12em;
+  color:var(--pink);
+  font-size:1.5rem;
+  margin:0 0 10px;
+  text-shadow:0 0 14px var(--glow);
+}
+.modal p,.modal li{color:var(--muted);font-size:.92rem;line-height:1.55}
+.modal ul{padding-left:18px;margin:0 0 18px}
+.modal li{margin-bottom:8px}
+.modal li strong{color:var(--text)}
+
+.final{
+  font-family:var(--display);
+  font-size:2.6rem;
+  color:#fff;
+  text-align:center;
+  margin:14px 0 4px;
+  font-variant-numeric:tabular-nums;
+}
+.final-label{
+  text-align:center;font-size:.62rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 6px;
+}
+
+.action-btn{
+  background:var(--pink);
+  color:#fff;
+  border:none;
+  padding:13px 20px;
+  font-family:var(--body);
+  font-size:.95rem;font-weight:700;
+  letter-spacing:.04em;
+  border-radius:10px;
+  cursor:pointer;
+  box-shadow:0 0 18px var(--glow);
+  width:100%;
+  margin-top:14px;
+  transition:filter .15s,transform .1s;
+}
+.action-btn.ghost{
+  background:transparent;
+  border:1.5px solid var(--line);
+  color:var(--muted);
+  box-shadow:none;
+  margin-top:8px;
+}
+.action-btn:hover{filter:brightness(1.12)}
+.action-btn:active{transform:scale(.985)}
+.action-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+@media (max-height:700px){
+  .mini-cell{width:12px;height:12px}
+  #game-container{padding:11px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TRI<span class="tri">▲</span>NGLE TRIBE</h1>
+  <div class="header-controls">
+    <button class="icon-btn" id="music-toggle" title="Play music" aria-label="Play music">♪</button>
+    <button class="icon-btn" id="info-btn" title="How to play" aria-label="How to play">i</button>
+    <button class="icon-btn" id="restart-btn" title="Start again" aria-label="Start again">↺</button>
+  </div>
+</header>
+
+<div id="stats-bar">
+  <div><span class="score-label">Score</span><span class="score-value" id="score">0</span></div>
+  <div id="combo-flag"></div>
+  <div style="text-align:right"><span class="score-label">Best</span><span class="score-value" id="best-score">0</span></div>
+</div>
+
+<div id="game-container">
+  <div id="game-board"></div>
+  <div id="piece-tray">
+    <div class="piece-slot" data-slot="0"></div>
+    <div class="piece-slot" data-slot="1"></div>
+    <div class="piece-slot" data-slot="2"></div>
+  </div>
+</div>
+
+<p id="hint">Tap a shape, then tap the grid — or drag it across</p>
+
+<div id="drag-avatar"></div>
+
+<!-- How to play -->
+<div id="info-modal" class="modal">
+  <div class="modal-content">
+    <h2>HOW TO PLAY</h2>
+    <ul>
+      <li><strong>Tap</strong> a shape to pick it up, then tap the grid to drop it. Or <strong>drag</strong> it straight across.</li>
+      <li>Fill a whole <strong>row, column or 3×3 box</strong> to shatter it.</li>
+      <li>Clear more than one at once for a <strong>combo multiplier</strong>.</li>
+      <li>The round ends when none of your three shapes fit.</li>
+    </ul>
+    <button class="action-btn" data-close="info-modal">Let's play</button>
+  </div>
+</div>
+
+<!-- Restart confirm -->
+<div id="restart-modal" class="modal">
+  <div class="modal-content">
+    <h2>START AGAIN?</h2>
+    <p>This clears the grid and sets your score back to zero. Your best stays.</p>
+    <button class="action-btn" id="confirm-restart">Start again</button>
+    <button class="action-btn ghost" data-close="restart-modal">Keep playing</button>
+  </div>
+</div>
+
+<!-- Game over -->
+<div id="over-modal" class="modal">
+  <div class="modal-content">
+    <h2 id="over-title">NO MOVES LEFT</h2>
+    <p id="over-sub" style="text-align:center">None of your three shapes fit the grid.</p>
+    <p class="final-label" style="margin-top:16px">Final score</p>
+    <div class="final" id="final-score">0</div>
+    <p id="over-best" style="text-align:center;font-size:.8rem"></p>
+    <button class="action-btn" id="play-again">Play again</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const SIZE = 9;
+const boardEl   = document.getElementById('game-board');
+const trayEl    = document.getElementById('piece-tray');
+const avatarEl  = document.getElementById('drag-avatar');
+const scoreEl   = document.getElementById('score');
+const bestEl    = document.getElementById('best-score');
+const comboEl   = document.getElementById('combo-flag');
+
+let board = [];
+let tray = [null, null, null];
+let score = 0;
+let best = 0;
+let busy = false;          // true while a clear animation runs
+let gameOver = false;
+let selected = null;       // slot index chosen by tap-to-place
+
+/* localStorage is blocked in some sandboxes — never let it break the game */
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+};
+best = parseInt(store.get('triangle_tribe_best', '0'), 10) || 0;
+bestEl.textContent = best;
+
+/* ============================================================
+   SHAPES — the Wood Block Sudoku set, weighted so small pieces
+   show up more often than the monsters.
+   ============================================================ */
+const SHAPES = [
+  { w:6, g:[[1]] },
+  { w:7, g:[[1,1]] },
+  { w:7, g:[[1],[1]] },
+  { w:6, g:[[1,1,1]] },
+  { w:6, g:[[1],[1],[1]] },
+  { w:3, g:[[1,1,1,1]] },
+  { w:3, g:[[1],[1],[1],[1]] },
+  { w:1, g:[[1,1,1,1,1]] },
+  { w:1, g:[[1],[1],[1],[1],[1]] },
+  { w:6, g:[[1,1],[1,1]] },
+  { w:1, g:[[1,1,1],[1,1,1],[1,1,1]] },
+  /* small corners */
+  { w:5, g:[[1,0],[1,1]] },
+  { w:5, g:[[0,1],[1,1]] },
+  { w:5, g:[[1,1],[1,0]] },
+  { w:5, g:[[1,1],[0,1]] },
+  /* big corners */
+  { w:3, g:[[1,0,0],[1,0,0],[1,1,1]] },
+  { w:3, g:[[0,0,1],[0,0,1],[1,1,1]] },
+  { w:3, g:[[1,1,1],[1,0,0],[1,0,0]] },
+  { w:3, g:[[1,1,1],[0,0,1],[0,0,1]] },
+  /* tees */
+  { w:3, g:[[1,1,1],[0,1,0]] },
+  { w:3, g:[[0,1,0],[1,1,1]] },
+  { w:3, g:[[1,0],[1,1],[1,0]] },
+  { w:3, g:[[0,1],[1,1],[0,1]] },
+  /* esses */
+  { w:2, g:[[0,1,1],[1,1,0]] },
+  { w:2, g:[[1,1,0],[0,1,1]] },
+  { w:2, g:[[1,0],[1,1],[0,1]] },
+  { w:2, g:[[0,1],[1,1],[1,0]] },
+  /* rectangles */
+  { w:3, g:[[1,1,1],[1,1,1]] },
+  { w:3, g:[[1,1],[1,1],[1,1]] }
+];
+const TOTAL_WEIGHT = SHAPES.reduce((a,s)=>a+s.w, 0);
+
+function randomShape(){
+  let r = Math.random() * TOTAL_WEIGHT;
+  for (const s of SHAPES){
+    r -= s.w;
+    if (r <= 0) return s.g.map(row => row.slice());
+  }
+  return SHAPES[0].g.map(row => row.slice());
+}
+
+/* ============================================================
+   BOARD DOM
+   ============================================================ */
+function buildBoardDOM(){
+  boardEl.innerHTML = '';
+  for (let r = 0; r < SIZE; r++){
+    for (let c = 0; c < SIZE; c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      // shade alternating 3x3 boxes so the sudoku regions are visible
+      if ((Math.floor(r/3) + Math.floor(c/3)) % 2 === 0) cell.classList.add('band');
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      boardEl.appendChild(cell);
+    }
+  }
+}
+const cellAt = (r, c) => boardEl.children[r * SIZE + c];
+
+function renderBoard(){
+  for (let r = 0; r < SIZE; r++){
+    for (let c = 0; c < SIZE; c++){
+      cellAt(r, c).classList.toggle('filled', board[r][c] === 1);
+    }
+  }
+  scoreEl.textContent = score;
+}
+
+function clearGhost(){
+  boardEl.querySelectorAll('.ghost, .ghost-bad').forEach(el => el.classList.remove('ghost','ghost-bad'));
+}
+
+function drawGhost(piece, r0, c0, ok){
+  const cls = ok ? 'ghost' : 'ghost-bad';
+  for (let r = 0; r < piece.length; r++){
+    for (let c = 0; c < piece[0].length; c++){
+      if (!piece[r][c]) continue;
+      const R = r0 + r, C = c0 + c;
+      if (R >= 0 && R < SIZE && C >= 0 && C < SIZE) cellAt(R, C).classList.add(cls);
+    }
+  }
+}
+
+/* ============================================================
+   TRAY
+   ============================================================ */
+function miniGrid(piece, cellPx, gapPx){
+  const el = document.createElement('div');
+  el.className = 'mini-grid';
+  el.style.gridTemplateColumns = `repeat(${piece[0].length}, ${cellPx ? cellPx + 'px' : '1fr'})`;
+  el.style.gridTemplateRows    = `repeat(${piece.length}, ${cellPx ? cellPx + 'px' : '1fr'})`;
+  if (gapPx != null) el.style.gap = gapPx + 'px';
+  for (let r = 0; r < piece.length; r++){
+    for (let c = 0; c < piece[0].length; c++){
+      const d = document.createElement('div');
+      d.className = 'mini-cell' + (piece[r][c] ? ' on' : '');
+      if (cellPx){ d.style.width = cellPx + 'px'; d.style.height = cellPx + 'px'; }
+      el.appendChild(d);
+    }
+  }
+  return el;
+}
+
+function renderTray(){
+  for (let i = 0; i < 3; i++){
+    const slot = trayEl.children[i];
+    slot.innerHTML = '';
+    slot.classList.toggle('empty', tray[i] === null);
+    slot.classList.toggle('selected', selected === i);
+    slot.classList.remove('dragging');
+    slot.style.opacity = '';
+    if (tray[i]) slot.appendChild(miniGrid(tray[i]));
+  }
+}
+
+/* Refill only when all three are gone. Try a few times to hand out a
+   set where at least one shape actually fits, so rounds don't die early. */
+function refillTray(){
+  if (!tray.every(p => p === null)) return;
+  for (let attempt = 0; attempt < 12; attempt++){
+    const set = [randomShape(), randomShape(), randomShape()];
+    if (set.some(p => hasAnyFit(p))){ tray = set; renderTray(); return; }
+  }
+  tray = [randomShape(), randomShape(), randomShape()];
+  renderTray();
+}
+
+/* ============================================================
+   RULES
+   ============================================================ */
+function fits(piece, r0, c0){
+  if (r0 < 0 || c0 < 0) return false;
+  if (r0 + piece.length > SIZE || c0 + piece[0].length > SIZE) return false;
+  for (let r = 0; r < piece.length; r++)
+    for (let c = 0; c < piece[0].length; c++)
+      if (piece[r][c] && board[r0 + r][c0 + c]) return false;
+  return true;
+}
+
+function hasAnyFit(piece){
+  for (let r = 0; r <= SIZE - piece.length; r++)
+    for (let c = 0; c <= SIZE - piece[0].length; c++)
+      if (fits(piece, r, c)) return true;
+  return false;
+}
+
+function place(slot, r0, c0){
+  const piece = tray[slot];
+  if (!piece || !fits(piece, r0, c0)) return false;
+
+  let blocks = 0;
+  for (let r = 0; r < piece.length; r++)
+    for (let c = 0; c < piece[0].length; c++)
+      if (piece[r][c]){ board[r0 + r][c0 + c] = 1; blocks++; }
+
+  score += blocks;
+  tray[slot] = null;
+  selected = null;
+  renderBoard();
+  renderTray();
+  sfxPlace();
+  resolveClears();
+  return true;
+}
+
+function resolveClears(){
+  const rows = [], cols = [], boxes = [];
+  for (let i = 0; i < SIZE; i++){
+    if (board[i].every(v => v === 1)) rows.push(i);
+    if (board.every(row => row[i] === 1)) cols.push(i);
+  }
+  for (let br = 0; br < SIZE; br += 3){
+    for (let bc = 0; bc < SIZE; bc += 3){
+      let full = true;
+      for (let r = 0; r < 3 && full; r++)
+        for (let c = 0; c < 3; c++)
+          if (!board[br + r][bc + c]){ full = false; break; }
+      if (full) boxes.push([br, bc]);
+    }
+  }
+
+  const lines = rows.length + cols.length + boxes.length;
+  if (lines === 0){ refillTray(); checkEnd(); return; }
+
+  // collect cells once so overlaps aren't double-counted
+  const marked = new Set();
+  rows.forEach(r => { for (let c = 0; c < SIZE; c++) marked.add(r * SIZE + c); });
+  cols.forEach(c => { for (let r = 0; r < SIZE; r++) marked.add(r * SIZE + c); });
+  boxes.forEach(([br, bc]) => {
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) marked.add((br + r) * SIZE + (bc + c));
+  });
+
+  busy = true;
+  marked.forEach(i => boardEl.children[i].classList.add('clearing'));
+  sfxClear(lines);
+  showCombo(lines);
+
+  setTimeout(() => {
+    marked.forEach(i => {
+      const el = boardEl.children[i];
+      el.classList.remove('clearing');
+      board[Math.floor(i / SIZE)][i % SIZE] = 0;
+    });
+    score += 18 * lines * lines;
+    busy = false;
+    renderBoard();
+    refillTray();
+    checkEnd();
+  }, 270);
+}
+
+function showCombo(lines){
+  if (lines < 2) return;
+  comboEl.textContent = `×${lines} COMBO`;
+  comboEl.classList.add('show');
+  setTimeout(() => comboEl.classList.remove('show'), 1100);
+}
+
+function checkEnd(){
+  if (score > best){
+    best = score;
+    bestEl.textContent = best;
+    store.set('triangle_tribe_best', String(best));
+  }
+  const live = tray.filter(p => p !== null);
+  if (live.length && !live.some(p => hasAnyFit(p))) endRound();
+}
+
+function endRound(){
+  gameOver = true;
+  selected = null;
+  renderTray();
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('over-best').textContent =
+    score >= best && score > 0 ? 'New personal best' : `Best: ${best}`;
+  sfxOver();
+  openModal('over-modal');
+}
+
+/* ============================================================
+   RESET — wipes every scrap of state
+   ============================================================ */
+function resetGame(){
+  board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+  tray = [null, null, null];
+  score = 0;
+  selected = null;
+  busy = false;
+  gameOver = false;
+  dragSlot = null;
+  avatarEl.style.display = 'none';
+  avatarEl.innerHTML = '';
+  comboEl.classList.remove('show');
+  clearGhost();
+  closeModal('over-modal');
+  closeModal('restart-modal');
+  boardEl.querySelectorAll('.clearing').forEach(el => el.classList.remove('clearing'));
+  renderBoard();
+  refillTray();
+}
+
+/* ============================================================
+   INPUT — drag and tap-to-place share one pointer pipeline
+   ============================================================ */
+let dragSlot = null;
+let dragMoved = false;
+let grabR = 0, grabC = 0;
+let metrics = null;
+let target = null;          // {r,c} currently under the piece
+let startX = 0, startY = 0;
+
+function boardMetrics(){
+  const a = cellAt(0, 0).getBoundingClientRect();
+  const b = cellAt(8, 8).getBoundingClientRect();
+  return {
+    size: a.width,
+    stepX: (b.left - a.left) / 8,
+    stepY: (b.top  - a.top ) / 8,
+    left: a.left,
+    top: a.top
+  };
+}
+
+const coarse = window.matchMedia('(pointer: coarse)').matches;
+
+trayEl.addEventListener('pointerdown', e => {
+  const slot = e.target.closest('.piece-slot');
+  if (!slot || busy || gameOver) return;
+  const i = +slot.dataset.slot;
+  if (!tray[i]) return;
+
+  e.preventDefault();
+  primeAudio();
+
+  dragSlot = i;
+  dragMoved = false;
+  startX = e.clientX; startY = e.clientY;
+  metrics = boardMetrics();
+
+  // which cell of the shape did the finger land on?
+  const grid = slot.querySelector('.mini-grid');
+  const gr = grid.getBoundingClientRect();
+  const piece = tray[i];
+  grabC = Math.min(piece[0].length - 1, Math.max(0, Math.floor((e.clientX - gr.left) / (gr.width  / piece[0].length))));
+  grabR = Math.min(piece.length    - 1, Math.max(0, Math.floor((e.clientY - gr.top ) / (gr.height / piece.length))));
+
+  // build an avatar at true board scale
+  const gap = Math.max(0, metrics.stepX - metrics.size);
+  avatarEl.innerHTML = '';
+  avatarEl.appendChild(miniGrid(piece, metrics.size, gap));
+  avatarEl.style.display = 'block';
+  slot.classList.add('dragging');
+
+  moveAvatar(e.clientX, e.clientY);
+
+  window.addEventListener('pointermove', onMove, { passive:false });
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+});
+
+function moveAvatar(px, py){
+  const m = metrics;
+  const lift = coarse ? m.stepY * 1.6 : 0;   // keep the shape above the thumb
+  const left = px - (grabC + 0.5) * m.stepX;
+  const top  = py - (grabR + 0.5) * m.stepY - lift;
+  avatarEl.style.transform = `translate(${left}px, ${top}px)`;
+
+  const c = Math.round((left - m.left) / m.stepX);
+  const r = Math.round((top  - m.top ) / m.stepY);
+  const piece = tray[dragSlot];
+
+  clearGhost();
+  const near = r > -piece.length && r < SIZE && c > -piece[0].length && c < SIZE;
+  if (near){
+    target = { r, c };
+    drawGhost(piece, r, c, fits(piece, r, c));
+  } else {
+    target = null;
+  }
+}
+
+function onMove(e){
+  if (dragSlot === null) return;
+  e.preventDefault();
+  if (Math.abs(e.clientX - startX) > 6 || Math.abs(e.clientY - startY) > 6) dragMoved = true;
+  moveAvatar(e.clientX, e.clientY);
+}
+
+function onUp(){
+  window.removeEventListener('pointermove', onMove);
+  window.removeEventListener('pointerup', onUp);
+  window.removeEventListener('pointercancel', onUp);
+  if (dragSlot === null) return;
+
+  const i = dragSlot;
+  avatarEl.style.display = 'none';
+  clearGhost();
+  trayEl.children[i].classList.remove('dragging');
+
+  const dropped = target && place(i, target.r, target.c);
+
+  // a tap that didn't go anywhere = pick the shape up for tap-to-place
+  if (!dropped && !dragMoved){
+    selected = (selected === i) ? null : i;
+    renderTray();
+  } else {
+    selected = null;
+    renderTray();
+  }
+
+  dragSlot = null;
+  target = null;
+}
+
+/* tap the grid to drop the selected shape, centred on that cell */
+boardEl.addEventListener('click', e => {
+  if (selected === null || busy || gameOver) return;
+  const cell = e.target.closest('.cell');
+  if (!cell) return;
+  const piece = tray[selected];
+  let r = +cell.dataset.r - Math.floor((piece.length - 1) / 2);
+  let c = +cell.dataset.c - Math.floor((piece[0].length - 1) / 2);
+  r = Math.max(0, Math.min(SIZE - piece.length, r));
+  c = Math.max(0, Math.min(SIZE - piece[0].length, c));
+  if (fits(piece, r, c)) place(selected, r, c);
+  clearGhost();
+});
+
+/* desktop preview for tap-to-place */
+boardEl.addEventListener('pointermove', e => {
+  if (selected === null || dragSlot !== null || busy || gameOver) return;
+  const cell = e.target.closest('.cell');
+  clearGhost();
+  if (!cell) return;
+  const piece = tray[selected];
+  let r = +cell.dataset.r - Math.floor((piece.length - 1) / 2);
+  let c = +cell.dataset.c - Math.floor((piece[0].length - 1) / 2);
+  r = Math.max(0, Math.min(SIZE - piece.length, r));
+  c = Math.max(0, Math.min(SIZE - piece[0].length, c));
+  drawGhost(piece, r, c, fits(piece, r, c));
+});
+boardEl.addEventListener('pointerleave', () => { if (dragSlot === null) clearGhost(); });
+
+/* ============================================================
+   AUDIO — generated live, so nothing depends on a hosted file
+   ============================================================ */
+let ac = null, master = null, musicBus = null, musicOn = false;
+let tickId = null, nextTime = 0, step = 0;
+const BPM = 74;
+const SPB = 60 / BPM / 4;   // seconds per 16th
+
+function primeAudio(){
+  if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  ac = new Ctx();
+  master = ac.createGain();
+  master.gain.value = 0.9;
+  master.connect(ac.destination);
+
+  musicBus = ac.createGain();
+  musicBus.gain.value = 0;
+  const warm = ac.createBiquadFilter();
+  warm.type = 'lowpass';
+  warm.frequency.value = 2200;
+  musicBus.connect(warm).connect(master);
+
+  // a lazy tape-style echo
+  const delay = ac.createDelay(1);
+  delay.delayTime.value = SPB * 3;
+  const fb = ac.createGain();
+  fb.gain.value = 0.3;
+  const wet = ac.createGain();
+  wet.gain.value = 0.22;
+  warm.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
+  musicBus.echo = wet;
+}
+
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+/* Am7 – Fmaj7 – Cmaj7 – G7, four bars, easy on the ears */
+const PROG = [
+  { bass: 45, pad: [57, 60, 64, 67] },
+  { bass: 41, pad: [57, 60, 65, 69] },
+  { bass: 48, pad: [55, 59, 64, 67] },
+  { bass: 43, pad: [55, 59, 62, 67] }
+];
+
+function tone(freq, t, dur, peak, type, dest){
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = type || 'sine';
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(dest || musicBus);
+  o.start(t);
+  o.stop(t + dur + 0.05);
+}
+
+function noise(t, dur, peak, hpf, dest){
+  const n = Math.floor(ac.sampleRate * dur);
+  const buf = ac.createBuffer(1, n, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const f = ac.createBiquadFilter();
+  f.type = 'highpass';
+  f.frequency.value = hpf;
+  const g = ac.createGain();
+  g.gain.value = peak;
+  src.connect(f).connect(g).connect(dest || musicBus);
+  src.start(t);
+}
+
+function kick(t){
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.frequency.setValueAtTime(140, t);
+  o.frequency.exponentialRampToValueAtTime(45, t + 0.14);
+  g.gain.setValueAtTime(0.55, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  o.connect(g).connect(musicBus);
+  o.start(t); o.stop(t + 0.32);
+}
+
+function scheduleStep(s, t){
+  const bar = Math.floor(s / 16) % 4;
+  const beat = s % 16;
+  const chord = PROG[bar];
+
+  if (beat === 0 || beat === 10) kick(t);
+  if (beat === 8) noise(t, 0.16, 0.16, 1200);                 // snare-ish
+  if (beat % 2 === 0) noise(t, 0.04, beat % 4 === 0 ? 0.05 : 0.03, 7000); // hats
+
+  if (beat === 0 || beat === 6){
+    tone(hz(chord.bass), t, 0.9, 0.22, 'triangle');
+  }
+  if (beat === 0 || beat === 7 || beat === 12){
+    chord.pad.forEach((m, i) => tone(hz(m), t + i * 0.012, 1.3, 0.055, 'sine'));
+  }
+  // a wandering top line, pentatonic so it can't sound wrong
+  if (beat === 4 || beat === 11 || beat === 14){
+    const scale = [0, 3, 5, 7, 10];
+    const n = chord.pad[0] + 12 + scale[Math.floor(Math.random() * scale.length)];
+    tone(hz(n), t, 0.5, 0.05, 'triangle');
+  }
+}
+
+function scheduler(){
+  while (nextTime < ac.currentTime + 0.2){
+    scheduleStep(step, nextTime);
+    step = (step + 1) % 64;
+    nextTime += SPB;
+  }
+}
+
+const musicBtn = document.getElementById('music-toggle');
+musicBtn.addEventListener('click', () => {
+  primeAudio();
+  if (!ac) return;
+  if (ac.state === 'suspended') ac.resume();
+
+  if (musicOn){
+    musicOn = false;
+    musicBtn.classList.remove('active');
+    musicBtn.title = musicBtn.ariaLabel = 'Play music';
+    musicBus.gain.cancelScheduledValues(ac.currentTime);
+    musicBus.gain.setTargetAtTime(0, ac.currentTime, 0.25);
+    clearInterval(tickId); tickId = null;
+  } else {
+    musicOn = true;
+    musicBtn.classList.add('active');
+    musicBtn.title = musicBtn.ariaLabel = 'Mute music';
+    step = 0;
+    nextTime = ac.currentTime + 0.1;
+    musicBus.gain.cancelScheduledValues(ac.currentTime);
+    musicBus.gain.setTargetAtTime(0.5, ac.currentTime, 0.4);
+    scheduler();
+    tickId = setInterval(scheduler, 60);
+  }
+});
+
+/* effects run off the master bus so they play with the music muted */
+function sfxPlace(){
+  if (!ac) return;
+  tone(560, ac.currentTime, 0.1, 0.11, 'triangle', master);
+}
+function sfxClear(lines){
+  if (!ac) return;
+  const t = ac.currentTime;
+  [0, 4, 7, 12, 16].slice(0, 2 + lines).forEach((s, i) =>
+    tone(hz(69 + s), t + i * 0.055, 0.35, 0.13, 'triangle', master));
+}
+function sfxOver(){
+  if (!ac) return;
+  const t = ac.currentTime;
+  [69, 65, 62, 57].forEach((m, i) => tone(hz(m), t + i * 0.13, 0.5, 0.14, 'sine', master));
+}
+
+/* ============================================================
+   MODALS + WIRING
+   ============================================================ */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('[data-close]').forEach(b =>
+  b.addEventListener('click', () => closeModal(b.dataset.close)));
+
+document.getElementById('info-btn').addEventListener('click', () => { primeAudio(); openModal('info-modal'); });
+document.getElementById('restart-btn').addEventListener('click', () => { primeAudio(); openModal('restart-modal'); });
+document.getElementById('confirm-restart').addEventListener('click', resetGame);
+document.getElementById('play-again').addEventListener('click', resetGame);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ closeModal('info-modal'); closeModal('restart-modal'); selected = null; renderTray(); clearGhost(); }
+});
+
+buildBoardDOM();
+resetGame();
+</script>
+</body>
+</html>
