@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>TRI▲NGLE TRIBE</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0714">
+<link rel="apple-touch-icon" href="icon-192.png">
 <!-- SVG Pink Triangle Favicon -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,10 100,90 0,90' fill='%23ff2a85'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1059,6 +1062,15 @@ document.addEventListener('keydown', e => {
 
 buildBoardDOM();
 resetGame();
+</script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker registered', reg))
+        .catch((err) => console.log('Service Worker failed', err));
+    });
+  }
 </script>
 </body>
 </html>
