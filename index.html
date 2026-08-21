@@ -15,6 +15,7 @@
 <style>
 :root{
   --bg:#0b0714;
+  --bg-glow:#1c1030;
   --panel:#150f24;
   --line:#2c1b42;
   --pink:#ff2a85;
@@ -23,15 +24,32 @@
   --text:#f0e6f6;
   --muted:#bfa3d4;
   --glow:rgba(255,42,133,.5);
+  --ghost:rgba(255,42,133,.28);
+  /* fixed mode accents — never re-themed, so both modes read the same on the leaderboard */
+  --easy:#ff2a85;
+  --hard:#31e6d6;
   --display:"Montserrat",system-ui,sans-serif;
   --body:"Space Grotesk",system-ui,-apple-system,sans-serif;
+}
+
+/* ---------- HARD MODE PALETTE (cyan swap) ---------- */
+body.hard-mode{
+  --bg-glow:#062a33;
+  --panel:#0e1a22;
+  --line:#17414a;
+  --pink:#31e6d6;
+  --pink-soft:#7ff5ea;
+  --cyan:#ff2a85;
+  --muted:#8fc9cf;
+  --glow:rgba(49,230,214,.5);
+  --ghost:rgba(49,230,214,.28);
 }
 
 *{box-sizing:border-box}
 
 html,body{height:100%}
 body{
-  background: radial-gradient(120% 80% at 50% -10%, #1c1030 0%, transparent 60%), var(--bg);
+  background: radial-gradient(120% 80% at 50% -10%, var(--bg-glow) 0%, transparent 60%), var(--bg);
   color:var(--text);
   font-family:var(--body);
   display:flex;
@@ -48,6 +66,7 @@ body{
   -webkit-user-select:none;
   -webkit-tap-highlight-color:transparent;
   touch-action:none;
+  transition:background .35s ease;
 }
 
 #main-wrapper {
@@ -88,6 +107,7 @@ h1 .tri{
   color:var(--cyan);
   text-shadow:0 0 14px rgba(49,230,214,.55);
 }
+body.hard-mode h1 .tri{ text-shadow:0 0 14px rgba(255,42,133,.55); }
 
 .header-controls{
   display:flex;
@@ -115,6 +135,50 @@ h1 .tri{
 .icon-btn.active{background:var(--pink);color:var(--bg);box-shadow:0 0 16px var(--glow)}
 .icon-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 
+/* ---------- mode switch ---------- */
+#mode-switch{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  padding:3px;
+  border:1.5px solid var(--pink);
+  border-radius:999px;
+  background:rgba(0,0,0,.28);
+  box-shadow:0 0 8px var(--glow);
+  cursor:pointer;
+  flex:0 0 auto;
+}
+#mode-switch:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+#mode-knob{
+  position:absolute;
+  top:3px;left:3px;
+  width:calc(50% - 3px);
+  height:calc(100% - 6px);
+  border-radius:999px;
+  background:var(--easy);
+  box-shadow:0 0 10px rgba(255,42,133,.55);
+  transition:transform .22s ease, background .22s ease, box-shadow .22s ease;
+}
+body.hard-mode #mode-knob{
+  transform:translateX(100%);
+  background:var(--hard);
+  box-shadow:0 0 10px rgba(49,230,214,.55);
+}
+.mode-opt{
+  position:relative;
+  z-index:1;
+  width:48px;
+  padding:6px 0;
+  text-align:center;
+  font-family:var(--display);
+  font-weight:700;
+  font-size:.58rem;
+  letter-spacing:.14em;
+  color:var(--muted);
+  transition:color .2s;
+}
+.mode-opt.on{color:#0b0714}
+
 /* ---------- stats ---------- */
 #stats-bar{
   display:flex;
@@ -123,6 +187,14 @@ h1 .tri{
   width:100%;
   max-width: min(420px, 100dvh - 280px);
   padding:0 4px;
+}
+.stat-col{flex:1 1 0;min-width:0}
+#mode-center{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
 }
 .score-label{
   font-size:.62rem;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);
@@ -145,6 +217,9 @@ h1 .tri{
   opacity:0;
   transition:opacity .25s;
   align-self:center;
+  white-space:nowrap;
+  line-height:1;
+  height:.8rem;
 }
 #combo-flag.show{opacity:1}
 
@@ -190,7 +265,7 @@ h1 .tri{
 }
 @keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
 
-.cell.ghost{ background:rgba(255,42,133,.28); border-color:var(--pink); }
+.cell.ghost{ background:var(--ghost); border-color:var(--pink); }
 .cell.ghost-bad{ background:rgba(255,60,60,.22); border-color:#ff4d4d; }
 .cell.clearing{
   background:#fff; border:none;
@@ -260,7 +335,7 @@ h1 .tri{
 #start-screen {
   position: fixed;
   inset: 0;
-  background: radial-gradient(120% 80% at 50% -10%, #1c1030 0%, transparent 60%), var(--bg);
+  background: radial-gradient(120% 80% at 50% -10%, var(--bg-glow) 0%, transparent 60%), var(--bg);
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -332,6 +407,17 @@ h1 .tri{
   text-align:center;font-size:.62rem;letter-spacing:.2em;
   text-transform:uppercase;color:var(--muted);margin:0 0 6px;
 }
+.mode-badge{
+  display:block;
+  text-align:center;
+  font-family:var(--display);
+  font-weight:700;
+  font-size:.6rem;
+  letter-spacing:.22em;
+  margin:0 0 8px;
+}
+.mode-badge.easy{color:var(--easy)}
+.mode-badge.hard{color:var(--hard)}
 
 .action-btn{
   background:var(--pink);
@@ -378,6 +464,26 @@ h1 .tri{
 .lb-entry { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 10px 0; }
 .lb-name { color: var(--text); font-weight: bold; font-family: var(--body); }
 .lb-score { color: var(--pink); font-family: var(--display); font-weight: bold; }
+.lb-entry.easy .lb-score { color: var(--easy); }
+.lb-entry.hard .lb-score { color: var(--hard); }
+
+#lb-tabs { display:flex; gap:8px; margin-top:6px; }
+.lb-tab{
+  flex:1;
+  background:transparent;
+  border:1.5px solid var(--line);
+  color:var(--muted);
+  font-family:var(--display);
+  font-weight:700;
+  font-size:.7rem;
+  letter-spacing:.14em;
+  padding:8px 0;
+  border-radius:999px;
+  cursor:pointer;
+  transition:border-color .18s,color .18s,background .18s;
+}
+.lb-tab[data-mode="easy"].active{ border-color:var(--easy); color:#fff; background:rgba(255,42,133,.18); }
+.lb-tab[data-mode="hard"].active{ border-color:var(--hard); color:#fff; background:rgba(49,230,214,.15); }
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -400,7 +506,7 @@ h1 .tri{
   <header>
     <h1>TRI<span class="tri">▲</span>NGLE TRIBE</h1>
     <div class="header-controls">
-       <button class="icon-btn active" id="sfx-toggle" title="Toggle Sound Effects">✦</button>
+      <button class="icon-btn active" id="sfx-toggle" title="Toggle Sound Effects">✦</button>
       <button class="icon-btn" id="music-toggle" title="Toggle Music">♪</button>
       <button class="icon-btn" id="info-btn" title="How to play">i</button>
       <button class="icon-btn" id="lb-btn" title="Global Leaderboard">★</button>
@@ -409,9 +515,16 @@ h1 .tri{
   </header>
 
   <div id="stats-bar">
-    <div><span class="score-label">Score</span><span class="score-value" id="score">0</span></div>
-    <div id="combo-flag"></div>
-    <div style="text-align:right"><span class="score-label">Best</span><span class="score-value" id="best-score">0</span></div>
+    <div class="stat-col"><span class="score-label">Score</span><span class="score-value" id="score">0</span></div>
+    <div id="mode-center">
+      <div id="combo-flag"></div>
+      <div id="mode-switch" role="switch" aria-checked="false" aria-label="Difficulty mode" tabindex="0">
+        <span id="mode-knob"></span>
+        <span class="mode-opt on" id="mode-easy">EASY</span>
+        <span class="mode-opt" id="mode-hard">HARD</span>
+      </div>
+    </div>
+    <div class="stat-col" style="text-align:right"><span class="score-label">Best</span><span class="score-value" id="best-score">0</span></div>
   </div>
 
   <div id="game-container">
@@ -437,6 +550,7 @@ h1 .tri{
       <li>Fill a whole <strong>row, column or 3×3 box</strong> to shatter it.</li>
       <li>Clear more than one at once for a <strong>combo multiplier</strong>.</li>
       <li>The round ends when none of your three shapes fit.</li>
+      <li><strong>Hard mode</strong> only shatters full rows and columns — 3×3 boxes stay put. Scores are ranked on their own board.</li>
     </ul>
     <button class="action-btn" data-close="info-modal">Got it</button>
     
@@ -450,6 +564,10 @@ h1 .tri{
 <div id="leaderboard-modal" class="modal">
   <div class="modal-content">
     <h2>TOP TRIBE</h2>
+    <div id="lb-tabs">
+      <button class="lb-tab active" data-mode="easy">EASY</button>
+      <button class="lb-tab" data-mode="hard">HARD</button>
+    </div>
     <div id="leaderboard-list" style="margin-top: 15px; max-height: 250px; overflow-y: auto;">
       <p style="text-align:center;">Loading scores...</p>
     </div>
@@ -467,12 +585,23 @@ h1 .tri{
   </div>
 </div>
 
+<!-- Mode switch confirm -->
+<div id="mode-modal" class="modal">
+  <div class="modal-content">
+    <h2>SWITCH MODE?</h2>
+    <p style="text-align: center;" id="mode-modal-text">Switching starts a fresh round. This score won't be saved.</p>
+    <button class="action-btn" id="confirm-mode">Switch and restart</button>
+    <button class="action-btn ghost" data-close="mode-modal">Keep playing</button>
+  </div>
+</div>
+
 <!-- Game over -->
 <div id="over-modal" class="modal">
   <div class="modal-content">
     <h2 id="over-title">NO MOVES LEFT</h2>
     <p id="over-sub" style="text-align:center">None of your three shapes fit the grid.</p>
     <div class="final" id="final-score">0</div>
+    <span class="mode-badge easy" id="over-mode">EASY MODE</span>
     <p id="over-best" style="text-align:center;font-size:.8rem"></p>
     
     <div id="submit-section" style="display: none; margin-top:15px;">
@@ -489,6 +618,9 @@ h1 .tri{
 
 // --- PASTE YOUR GOOGLE SCRIPT URL HERE ---
 const LEADERBOARD_URL = "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec";
+// Sentinel only — do NOT replace this line with your URL.
+const LEADERBOARD_PLACEHOLDER = "PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE";
+const lbReady = () => !!LEADERBOARD_URL && LEADERBOARD_URL !== LEADERBOARD_PLACEHOLDER;
 
 /* ============================================================
    STATE
@@ -511,11 +643,20 @@ let busy = false;
 let gameOver = false;
 let selected = null;
 
+let mode = 'easy';          // 'easy' | 'hard'
+let pendingModeSwitch = null;
+let pendingScore = 0;       // score frozen at game over, used for submission
+let pendingMode = 'easy';   // mode frozen at game over
+
 const store = {
   get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
 };
-best = parseInt(store.get('triangle_tribe_best', '0'), 10) || 0;
+
+const bestKey = m => m === 'hard' ? 'triangle_tribe_best_hard' : 'triangle_tribe_best';
+
+mode = store.get('triangle_tribe_mode', 'easy') === 'hard' ? 'hard' : 'easy';
+best = parseInt(store.get(bestKey(mode), '0'), 10) || 0;
 bestEl.textContent = best;
 
 /* ============================================================
@@ -691,13 +832,17 @@ function resolveClears(){
     if (board[i].every(v => v === 1)) rows.push(i);
     if (board.every(row => row[i] === 1)) cols.push(i);
   }
-  for (let br = 0; br < SIZE; br += 3){
-    for (let bc = 0; bc < SIZE; bc += 3){
-      let full = true;
-      for (let r = 0; r < 3 && full; r++)
-        for (let c = 0; c < 3; c++)
-          if (!board[br + r][bc + c]){ full = false; break; }
-      if (full) boxes.push([br, bc]);
+
+  // HARD MODE: 3x3 boxes never shatter — rows and columns only.
+  if (mode === 'easy'){
+    for (let br = 0; br < SIZE; br += 3){
+      for (let bc = 0; bc < SIZE; bc += 3){
+        let full = true;
+        for (let r = 0; r < 3 && full; r++)
+          for (let c = 0; c < 3; c++)
+            if (!board[br + r][bc + c]){ full = false; break; }
+        if (full) boxes.push([br, bc]);
+      }
     }
   }
 
@@ -741,7 +886,7 @@ function checkEnd(){
   if (score > best){
     best = score;
     bestEl.textContent = best;
-    store.set('triangle_tribe_best', String(best));
+    store.set(bestKey(mode), String(best));
   }
   const live = tray.filter(p => p !== null);
   if (live.length && !live.some(p => hasAnyFit(p))) endRound();
@@ -751,18 +896,30 @@ function endRound(){
   gameOver = true;
   selected = null;
   renderTray();
+
+  // Freeze the result so a later reset can't send a zero.
+  pendingScore = score;
+  pendingMode = mode;
+
   document.getElementById('final-score').textContent = score;
+  const badge = document.getElementById('over-mode');
+  badge.textContent = mode === 'hard' ? 'HARD MODE' : 'EASY MODE';
+  badge.className = 'mode-badge ' + mode;
   document.getElementById('over-best').textContent =
     score >= best && score > 0 ? 'New personal best!' : `Best: ${best}`;
-    
-  // Show submission field if score > 0
+
+  // Show submission field if score > 0 and a leaderboard URL is set
   const submitSection = document.getElementById('submit-section');
-  if (score > 0 && LEADERBOARD_URL !== "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec") {
+  const sBtn = document.getElementById('submit-score-btn');
+  if (score > 0 && lbReady()) {
+    sBtn.disabled = false;
+    sBtn.textContent = 'Submit to Leaderboard';
+    nameInput.value = store.get('triangle_tribe_name', '');
     submitSection.style.display = 'block';
   } else {
     submitSection.style.display = 'none';
   }
-  
+
   sfxOver();
   openModal('over-modal');
 }
@@ -784,10 +941,54 @@ function resetGame(){
   clearGhost();
   closeModal('over-modal');
   closeModal('restart-modal');
+  closeModal('mode-modal');
   boardEl.querySelectorAll('.clearing').forEach(el => el.classList.remove('clearing'));
   renderBoard();
   refillTray();
 }
+
+/* ============================================================
+   MODE SWITCH
+   ============================================================ */
+const modeSwitchEl = document.getElementById('mode-switch');
+
+function applyMode(){
+  document.body.classList.toggle('hard-mode', mode === 'hard');
+  document.getElementById('mode-easy').classList.toggle('on', mode === 'easy');
+  document.getElementById('mode-hard').classList.toggle('on', mode === 'hard');
+  modeSwitchEl.setAttribute('aria-checked', mode === 'hard' ? 'true' : 'false');
+  best = parseInt(store.get(bestKey(mode), '0'), 10) || 0;
+  bestEl.textContent = best;
+}
+
+function setMode(m){
+  mode = (m === 'hard') ? 'hard' : 'easy';
+  store.set('triangle_tribe_mode', mode);
+  applyMode();
+  resetGame();
+}
+
+function requestModeSwitch(){
+  primeAudio();
+  const next = mode === 'easy' ? 'hard' : 'easy';
+  if (!gameOver && score > 0){
+    pendingModeSwitch = next;
+    document.getElementById('mode-modal-text').textContent =
+      `Switching to ${next.toUpperCase()} starts a fresh round. This score won't be saved.`;
+    openModal('mode-modal');
+    return;
+  }
+  setMode(next);
+}
+
+modeSwitchEl.addEventListener('click', requestModeSwitch);
+modeSwitchEl.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); requestModeSwitch(); }
+});
+document.getElementById('confirm-mode').addEventListener('click', () => {
+  if (pendingModeSwitch) setMode(pendingModeSwitch);
+  pendingModeSwitch = null;
+});
 
 /* ============================================================
    INPUT
@@ -1102,37 +1303,67 @@ function sfxOver(){
 const lbBtn = document.getElementById('lb-btn');
 const submitBtn = document.getElementById('submit-score-btn');
 const nameInput = document.getElementById('player-name');
+let lbMode = 'easy';
+
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[ch]));
+}
+
+function setLbTabs(){
+  document.querySelectorAll('.lb-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.mode === lbMode));
+}
+
+document.querySelectorAll('.lb-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    if (lbMode === t.dataset.mode) return;
+    lbMode = t.dataset.mode;
+    setLbTabs();
+    loadLeaderboard();
+  });
+});
 
 lbBtn.addEventListener('click', () => {
+  lbMode = mode;
+  setLbTabs();
   openModal('leaderboard-modal');
   loadLeaderboard();
 });
 
 function loadLeaderboard() {
   const list = document.getElementById('leaderboard-list');
-  if (LEADERBOARD_URL === "https://script.google.com/macros/s/AKfycbzy3lEE3u-ZW7_J6Fkj__IDN1ypt3n56k_xfcDWJAAcbQPRJpcvGVb416Wpi1WUQ_Vk4Q/exec") {
+  if (!lbReady()) {
     list.innerHTML = '<p style="text-align:center;">Leaderboard not configured yet!</p>';
     return;
   }
-  
+
+  const want = lbMode;
   list.innerHTML = '<p style="text-align:center;">Loading scores...</p>';
-  
-  fetch(`${LEADERBOARD_URL}?action=get`)
+
+  fetch(`${LEADERBOARD_URL}?action=get&mode=${want}`)
     .then(res => res.json())
     .then(data => {
-      list.innerHTML = '';
-      if(data.length === 0) {
-        list.innerHTML = '<p style="text-align:center;">No scores yet. Be the first!</p>';
+      if (want !== lbMode) return; // a tab was switched mid-flight
+      const raw = Array.isArray(data) ? data
+                : (data && Array.isArray(data.scores)) ? data.scores
+                : [];
+      const rows = raw
+        .filter(e => String(e.mode || 'easy').toLowerCase() === want)
+        .sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0))
+        .slice(0, 25);
+
+      if (rows.length === 0) {
+        list.innerHTML = `<p style="text-align:center;">No ${want} scores yet. Be the first!</p>`;
         return;
       }
-      data.forEach((entry, index) => {
-        list.innerHTML += `
-          <div class="lb-entry">
-            <span class="lb-name">${index + 1}. ${entry.name}</span>
-            <span class="lb-score">${entry.score}</span>
+      list.innerHTML = rows.map((entry, index) => `
+          <div class="lb-entry ${want}">
+            <span class="lb-name">${index + 1}. ${escapeHtml(entry.name)}</span>
+            <span class="lb-score">${escapeHtml(entry.score)}</span>
           </div>
-        `;
-      });
+        `).join('');
     })
     .catch(err => {
       list.innerHTML = '<p style="text-align:center; color: #ff4d4d;">Failed to load leaderboard.</p>';
@@ -1140,14 +1371,18 @@ function loadLeaderboard() {
 }
 
 submitBtn.addEventListener('click', () => {
+  if (!lbReady() || pendingScore <= 0) return;
   const name = nameInput.value.trim() || "Anonymous";
+  store.set('triangle_tribe_name', name);
   submitBtn.disabled = true;
   submitBtn.textContent = "Submitting...";
 
-  fetch(`${LEADERBOARD_URL}?action=add&name=${encodeURIComponent(name)}&score=${score}`)
+  fetch(`${LEADERBOARD_URL}?action=add&name=${encodeURIComponent(name)}&score=${pendingScore}&mode=${pendingMode}`)
     .then(res => res.json())
     .then(() => {
       document.getElementById('submit-section').style.display = 'none';
+      lbMode = pendingMode;
+      setLbTabs();
       openModal('leaderboard-modal');
       loadLeaderboard();
     })
@@ -1177,10 +1412,12 @@ document.addEventListener('keydown', e => {
     closeModal('info-modal'); 
     closeModal('restart-modal'); 
     closeModal('leaderboard-modal');
+    closeModal('mode-modal');
     selected = null; renderTray(); clearGhost(); 
   }
 });
 
+applyMode();
 buildBoardDOM();
 resetGame();
 </script>
