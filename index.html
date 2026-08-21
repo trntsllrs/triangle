@@ -1027,20 +1027,32 @@ musicBtn.addEventListener('click', () => {
   }
 });
 
+let sfxOn = true;
+
 function sfxPlace(){
-  if (!ac) return;
+  if (!ac || !sfxOn) return;
   tone(560, ac.currentTime, 0.1, 0.11, 'triangle', master);
 }
 function sfxClear(lines){
-  if (!ac) return;
+  if (!ac || !sfxOn) return;
   const t = ac.currentTime;
   [0, 4, 7, 12, 16].slice(0, 2 + lines).forEach((s, i) =>
     tone(hz(69 + s), t + i * 0.055, 0.35, 0.13, 'triangle', master));
 }
 function sfxOver(){
-  if (!ac) return;
+  if (!ac || !sfxOn) return;
   const t = ac.currentTime;
   [69, 65, 62, 57].forEach((m, i) => tone(hz(m), t + i * 0.13, 0.5, 0.14, 'sine', master));
+}
+
+// Toggle Sound Effects Link
+const sfxToggleBtn = document.getElementById('sfx-toggle');
+if (sfxToggleBtn) {
+  sfxToggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    sfxOn = !sfxOn;
+    sfxToggleBtn.textContent = sfxOn ? "Mute Sound Effects" : "Unmute Sound Effects";
+  });
 }
 
 /* ============================================================
